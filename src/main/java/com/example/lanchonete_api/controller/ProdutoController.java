@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.lanchonete_api.model.Produto;
+import com.example.lanchonete_api.dto.ProdutoRequestDTO;
+import com.example.lanchonete_api.dto.ProdutoResponseDTO;
+
 import com.example.lanchonete_api.service.ProdutoService;
 
 import jakarta.validation.Valid;
@@ -23,19 +25,20 @@ public class ProdutoController {
 
     // CREATE
     @PostMapping
-    public Produto criar(@Valid @RequestBody Produto produto) {
-        return service.salvar(produto);
+    public ProdutoResponseDTO criar(
+            @Valid @RequestBody ProdutoRequestDTO dto) {
+        return service.salvar(dto);
     }
 
     // READ - listar todos
     @GetMapping
-    public List<Produto> listar() {
+    public List<ProdutoResponseDTO> listar() {
         return service.listarTodos();
     }
 
     // READ - buscar por id
     @GetMapping("/{id}")
-    public Produto buscar(@PathVariable Long id) {
+    public ProdutoResponseDTO buscar(@PathVariable Long id) {
         return service.buscarPorId(id);
     }
 
@@ -48,17 +51,10 @@ public class ProdutoController {
 
     // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<Produto> atualizar(
+    public ProdutoResponseDTO atualizar(
             @PathVariable Long id,
-            @RequestBody Produto produto) {
-
-        Produto atualizado = service.atualizar(id, produto);
-
-        if (atualizado == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(atualizado);
+            @Valid @RequestBody ProdutoRequestDTO dto) {
+        return service.atualizar(id, dto);
     }
 
 }

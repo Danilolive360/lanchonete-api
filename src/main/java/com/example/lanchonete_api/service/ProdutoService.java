@@ -1,58 +1,107 @@
 package com.example.lanchonete_api.service;
 
+// Serviço para gerenciar produtos
 import java.util.List;
 
+// Importações necessárias
 import org.springframework.stereotype.Service;
 
+import com.example.lanchonete_api.dto.ProdutoRequestDTO;
+import com.example.lanchonete_api.dto.ProdutoResponseDTO;
+// Importações de classes do projeto
 import com.example.lanchonete_api.model.Produto;
 import com.example.lanchonete_api.repository.ProdutoRepository;
 
-import jakarta.persistence.EntityNotFoundException;
+// Exceção para entidade não encontrada
 
+// Anotação de serviço do Spring
 @Service
 // Lógica de negócio relacionada a produtos
 public class ProdutoService {
 
+    // Repositório para operações de banco de dados
     private final ProdutoRepository repository;
 
+    // Construtor para injeção de dependência do repositório
     public ProdutoService(ProdutoRepository repository) {
         this.repository = repository;
     }
 
-    public Produto salvar(Produto produto) {
-        return repository.save(produto);
+    // Salva um novo produto no banco de dados
+    public ProdutoResponseDTO salvar(ProdutoRequestDTO dto) {
+        Produto produto = new Produto();
+
+        produto.setNome(dto.getNome());
+        produto.setPreco(dto.getPreco());
+        produto.setCategoria(dto.getCategoria());
+        produto.setDescricao(dto.getDescricao());
+        produto.setDisponivel(dto.getDisponivel());
+
+        Produto salvo = repository.save(produto);
+
+        return new ProdutoResponseDTO(
+                salvo.getId(),
+                salvo.getNome(),
+                salvo.getPreco(),
+                salvo.getCategoria(),
+                salvo.getDescricao(),
+                salvo.getDisponivel());
     }
 
-    public List<Produto> listarTodos() {
-        return repository.findAll();
+    // Retorna uma lista de todos os produtos
+    public List<ProdutoResponseDTO> listarTodos() {
+        return repository.findAll()
+                .stream()
+                .map(p -> new ProdutoResponseDTO(
+                        p.getId(),
+                        p.getNome(),
+                        p.getPreco(),
+                        p.getCategoria(),
+                        p.getDescricao(),
+                        p.getDisponivel()))
+                .toList();
     }
 
-    public Produto buscarPorId(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Produto com id " + id + " não encontrado"));
+    // Busca um produto pelo seu ID
+    public ProdutoResponseDTO buscarPorId(Long id) {
+        Produto produto = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        return new ProdutoResponseDTO(
+                produto.getId(),
+                produto.getNome(),
+                produto.getPreco(),
+                produto.getCategoria(),
+                produto.getDescricao(),
+                produto.getDisponivel());
     }
 
+    // Deleta um produto pelo seu ID
     public void deletar(Long id) {
         repository.deleteById(id);
     }
 
     // Atualiza um produto existente
-    public Produto atualizar(Long id, Produto produtoAtualizado) {
-        Produto produto = repository.findById(id).orElse(null);
+    public ProdutoResponseDTO atualizar(Long id, ProdutoRequestDTO dto) {
 
-        if (produto == null) {
-            return null;
-        }
+        Produto produto = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
-        produto.setNome(produtoAtualizado.getNome());
-        produto.setDescricao(produtoAtualizado.getDescricao());
-        produto.setPreco(produtoAtualizado.getPreco());
-        produto.setCategoria(produtoAtualizado.getCategoria());
-        produto.setDisponivel(produtoAtualizado.getDisponivel());
+        produto.setNome(dto.getNome());
+        produto.setPreco(dto.getPreco());
+        produto.setCategoria(dto.getCategoria());
+        produto.setDescricao(dto.getDescricao());
+        produto.setDisponivel(dto.getDisponivel());
 
-        return repository.save(produto);
+        Produto atualizado = repository.save(produto);
 
+        return new ProdutoResponseDTO(
+                atualizado.getId(),
+                atualizado.getNome(),
+                atualizado.getPreco(),
+                atualizado.getCategoria(),
+                atualizado.getDescricao(),
+                atualizado.getDisponivel());
     }
 
 }

@@ -2,7 +2,6 @@ package com.example.lanchonete_api.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "produtos")
@@ -17,7 +16,7 @@ public class Produto {
 
     @NotNull(message = "Preço é obrigatório")
     @Positive(message = "Preço deve ser maior que zero")
-    private BigDecimal preco;
+    private Double preco;
 
     private String descricao;
     private String categoria;
@@ -54,11 +53,11 @@ public class Produto {
         this.descricao = descricao;
     }
 
-    public BigDecimal getPreco() {
+    public Double getPreco() {
         return preco;
     }
 
-    public void setPreco(BigDecimal preco) {
+    public void setPreco(Double preco) {
         this.preco = preco;
     }
 
