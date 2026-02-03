@@ -5,12 +5,17 @@ import java.util.List;
 
 // Importações necessárias
 import org.springframework.stereotype.Service;
-
+// Importações de classes do projeto
 import com.example.lanchonete_api.dto.ProdutoRequestDTO;
 import com.example.lanchonete_api.dto.ProdutoResponseDTO;
-// Importações de classes do projeto
+
+// Importações do modelo e repositório
 import com.example.lanchonete_api.model.Produto;
 import com.example.lanchonete_api.repository.ProdutoRepository;
+
+// Importações de paginação
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 // Exceção para entidade não encontrada
 
@@ -102,6 +107,47 @@ public class ProdutoService {
                 atualizado.getCategoria(),
                 atualizado.getDescricao(),
                 atualizado.getDisponivel());
+    }
+
+    // Lista produtos de forma paginada
+    public Page<ProdutoResponseDTO> listarPaginado(Pageable pageable) {
+
+        return repository.findAll(pageable)
+                .map(produto -> new ProdutoResponseDTO(
+                        produto.getId(),
+                        produto.getNome(),
+                        produto.getPreco(),
+                        produto.getCategoria(),
+                        produto.getDescricao(),
+                        produto.getDisponivel()));
+    }
+
+    // Busca produtos com filtros opcionais e paginação
+    public Page<ProdutoResponseDTO> buscar(
+            String categoria,
+            Boolean disponivel,
+            String nome,
+            Pageable pageable) {
+
+        Page<Produto> page;
+
+        if (categoria != null) {
+            page = repository.findByCategoria(categoria, pageable);
+        } else if (disponivel != null) {
+            page = repository.findByDisponivel(disponivel, pageable);
+        } else if (nome != null) {
+            page = repository.findByNomeContainingIgnoreCase(nome, pageable);
+        } else {
+            page = repository.findAll(pageable);
+        }
+
+        return page.map(p -> new ProdutoResponseDTO(
+                p.getId(),
+                p.getNome(),
+                p.getPreco(),
+                p.getCategoria(),
+                p.getDescricao(),
+                p.getDisponivel()));
     }
 
 }
